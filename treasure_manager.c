@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +8,7 @@
 #include <time.h>
 #include <dirent.h>
 #include <errno.h>
+
 
 #define USERNAME_SIZE 32
 #define CLUE_SIZE 128
@@ -58,7 +60,8 @@ void add_treasure(const char* hunt_id) {
     printf("Enter username: "); scanf("%s", t.username);
     printf("Enter latitude: "); scanf("%f", &t.latitude);
     printf("Enter longitude: "); scanf("%f", &t.longitude);
-    printf("Enter clue: "); getchar(); fgets(t.clue, CLUE_SIZE, stdin);
+    printf("Enter clue: "); getchar();
+    fgets(t.clue, CLUE_SIZE, stdin);
     t.clue[strcspn(t.clue, "\n")] = 0;
     printf("Enter value: "); scanf("%d", &t.value);
 
@@ -151,12 +154,12 @@ int main(int argc, char* argv[]) {
         list_treasures(hunt_id);
     } else if (strcmp(op, "--view") == 0 && argc == 4) {
         view_treasure(hunt_id, atoi(argv[3]));
-    } else if (strcmp(op, "--remove_treasure") == 0 && argc == 4) {
-        remove_treasure(hunt_id, atoi(argv[3]));
-    } else if (strcmp(op, "--remove") == 0) {
-        remove_hunt(hunt_id);
+     } else if (strcmp(op, "--remove_treasure") == 0 && argc == 4) {
+       remove_treasure(hunt_id, atoi(argv[3]));
+     } else if (strcmp(op, "--remove") == 0) {
+       remove_hunt(hunt_id);
     } else {
-        fprintf(stderr, "Invalid command or arguments.\n");
+     fprintf(stderr, "Invalid command or arguments.\n");
     }
 
     return 0;
