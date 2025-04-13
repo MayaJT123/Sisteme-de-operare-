@@ -128,16 +128,39 @@ void remove_treasure(const char* hunt_id, int target_id) {
 }
 
 void remove_hunt(const char* hunt_id) {
-    char* path = build_path(hunt_id, "treasures.dat");
-    unlink(path);
-    unlink(build_path(hunt_id, "logged_hunt"));
+    DIR* dir = opendir(hunt_id);
+    if (!dir) {
+        perror("opendir");
+        return;
+    }
+
+    struct dirent* entry;
+    char filepath[BUFFER_SIZE];
+
+    while ((entry = readdir(dir)) != NULL) {
+        // Skip "." and ".."
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+
+        snprintf(filepath, BUFFER_SIZE, "%s/%s", hunt_id, entry->d_name);
+        if (unlink(filepath) != 0) {
+            perror("unlink");
+        }
+    }
+
+    closedir(dir);
+
+    if (rmdir(hunt_id) != 0) {
+        perror("rmdir");
+    }
 
     char link[BUFFER_SIZE];
     snprintf(link, BUFFER_SIZE, "logged_hunt-%s", hunt_id);
     unlink(link);
 
-    rmdir(hunt_id);
+    printf("Hunt '%s' and its contents were removed.\n", hunt_id);
 }
+
 
 int main(int argc, char* argv[]) {
     if (argc < 3) {
@@ -156,7 +179,7 @@ int main(int argc, char* argv[]) {
         view_treasure(hunt_id, atoi(argv[3]));
      } else if (strcmp(op, "--remove_treasure") == 0 && argc == 4) {
        remove_treasure(hunt_id, atoi(argv[3]));
-     } else if (strcmp(op, "--remove") == 0) {
+     } else if (strcmp(op, "--remove_hunt") == 0) {
        remove_hunt(hunt_id);
     } else {
      fprintf(stderr, "Invalid command or arguments.\n");
