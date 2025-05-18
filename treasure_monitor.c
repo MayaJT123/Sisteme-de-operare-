@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <signal.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -8,7 +9,7 @@
 
 #define COMMAND_FILE "hub_command.txt"
 #define USERNAME_SIZE 32
-#define CLUE_SIZE 64
+#define CLUE_SIZE 128
 
 typedef struct {
     int id;
@@ -25,6 +26,7 @@ void sigusr1_handler(int sig) {
     command_ready = 1;
 }
 
+
 void list_treasures(const char *hunt_id) {
     char filepath[256];
     snprintf(filepath, sizeof(filepath), "%s/treasures.dat", hunt_id);
@@ -35,15 +37,30 @@ void list_treasures(const char *hunt_id) {
         return;
     }
 
-    Treasure t;
     printf("Treasures in hunt '%s':\n", hunt_id);
+    Treasure t;
+    int i = 0;
+
     while (fread(&t, sizeof(Treasure), 1, f) == 1) {
+        printf("DEBUG raw value bytes: ");
+        unsigned char *p = (unsigned char*)&t;
+        for (int j = 0; j < sizeof(Treasure); j++) {
+            printf("%02X ", p[j]);
+        }
+        printf("\n");
+
         printf("ID: %d | User: %s | GPS: (%.4f, %.4f) | Value: %d\n",
                t.id, t.username, t.latitude, t.longitude, t.value);
+        i++;
     }
+
+    if (i == 0)
+        printf("No treasures found.\n");
 
     fclose(f);
 }
+
+
 
 void view_treasure(const char *hunt_id, int treasure_id) {
     char filepath[256];
@@ -58,7 +75,6 @@ void view_treasure(const char *hunt_id, int treasure_id) {
     Treasure t;
     int found = 0;
 
-    // Search through the file for the treasure with the matching ID
     while (fread(&t, sizeof(Treasure), 1, f) == 1) {
         if (t.id == treasure_id) {
             found = 1;
@@ -168,6 +184,8 @@ int main() {
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sigaction(SIGUSR1, &sa, NULL);
+
+    setvbuf(stdout, NULL, _IONBF, 0);
 
     printf("Monitor is running (PID %d). Waiting for commands...\n", getpid());
 
