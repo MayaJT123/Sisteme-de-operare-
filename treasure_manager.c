@@ -36,7 +36,7 @@ void log_operation(const char* hunt_id, const char* message) {
 
     time_t now = time(NULL);
     char* timestr = ctime(&now);
-    timestr[strlen(timestr) - 1] = '\0'; // remove newline
+    timestr[strlen(timestr) - 1] = '\0'; 
 
     dprintf(fd, "[%s] %s\n", timestr, message);
     close(fd);
@@ -46,7 +46,7 @@ void create_symlink(const char* hunt_id) {
     char link_name[BUFFER_SIZE];
     snprintf(link_name, BUFFER_SIZE, "logged_hunt-%s", hunt_id);
     char* target = build_path(hunt_id, "logged_hunt");
-    symlink(target, link_name); // Ignore error if already exists
+    symlink(target, link_name); 
 }
 
 void add_treasure(const char* hunt_id) {
@@ -138,7 +138,7 @@ void remove_hunt(const char* hunt_id) {
     char filepath[BUFFER_SIZE];
 
     while ((entry = readdir(dir)) != NULL) {
-        // Skip "." and ".."
+    
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
             continue;
 
